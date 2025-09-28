@@ -1,0 +1,3 @@
+[submodule "toshi-moto"]
+	path = toshi-moto
+	url = git@github.com:toshimoto821/toshi-moto.git
