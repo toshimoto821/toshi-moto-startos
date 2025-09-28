@@ -1,0 +1,47 @@
+id: hello-world-fullstack
+title: Hello World Full Stack
+license: mit
+wrapperRepo: https://github.com/Start9Labs/hello-world-fullstack
+upstreamRepo: https://github.com/Start9Labs/hello-world-fullstack
+supportSite: https://github.com/Start9Labs/hello-world-fullstack/issues
+marketingSite: https://github.com/Start9Labs/hello-world-fullstack
+donationUrl: https://github.com/Start9Labs/hello-world-fullstack
+docsUrl: https://github.com/Start9Labs/hello-world-fullstack#readme
+description:
+  short: A full-stack hello world application with React, Node.js, and MongoDB
+  long: >-
+    This is a demonstration application showing how to package a full-stack web
+    application for StartOS. It includes a React frontend, Node.js backend API,
+    and MongoDB database all running in a single container. Perfect for learning
+    how to create complex Start9 services.
+volumes:
+  - main
+images:
+  main:
+    source:
+      dockerBuild: {}
+    arch:
+      - aarch64
+      - x86_64
+    emulateMissingAs: aarch64
+hardwareRequirements:
+  device: []
+  ram: null
+  arch: null
+alerts:
+  install: null
+  update: null
+  uninstall: null
+  restore: null
+  start: null
+  stop: null
+dependencies: {}
+gitHash: null
+osVersion: 0.4.0-alpha.10
+sdkVersion: 0.4.0-beta.41
+version: 0.1.0:0
+releaseNotes: Initial release
+satisfies: []
+canMigrateTo: '=0.1.0:0'
+canMigrateFrom: <=0.1.0:0
+
