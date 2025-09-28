@@ -5,7 +5,10 @@
   "scripts": {
     "build": "rm -rf ./javascript && ncc build startos/index.ts -o ./javascript",
     "prettier": "prettier --write .",
-    "check": "tsc --noEmit"
+    "check": "tsc --noEmit",
+    "toshi:install": "cd toshi-moto && pnpm install --frozen-lockfile",
+    "toshi:build-ui": "cd toshi-moto && npx nx web-ui:build-umbrel",
+    "toshi:build-api": "cd toshi-moto && npx nx api:build"
   },
   "dependencies": {
     "@start9labs/start-sdk": "^0.4.0-beta.41"

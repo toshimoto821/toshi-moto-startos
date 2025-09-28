@@ -1,17 +1,15 @@
-# Build frontend
-FROM node:18-alpine AS frontend
+# Build toshi
+FROM node:20-alpine AS toshi
 WORKDIR /app
-COPY frontend/package*.json ./
-RUN npm install
-COPY frontend/ ./
-RUN npm run build
 
-# Build backend
-FROM node:18-alpine AS backend
-WORKDIR /app
-COPY backend/package*.json ./
-RUN npm install --omit=dev
-COPY backend/ ./
+RUN npm install -g pnpm
+
+COPY toshi-moto ./toshi-moto
+RUN npm run toshi:install
+# frontend is toshi-moto/apps/web-ui
+RUN npm run toshi:build-ui
+RUN npm run toshi:build-api
+
 
 # Final image - use Ubuntu with direct MongoDB binary download
 FROM ubuntu:20.04
@@ -22,13 +20,11 @@ RUN apt-get update && apt-get install -y \
     wget \
     nginx \
     ca-certificates \
-    && curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
+    && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
     && apt-get install -y nodejs \
     && rm -rf /var/lib/apt/lists/*
 
-
-# image: mongo:4.4.6-bionic@sha256:3d0e6df9fd5bc42cbf8ef8bc9e6c4e78f6f26c7157dbd7bdec72d202ab8ebe3a
-
+# version of mongo after 4.4.6 dont work on raspberry pi
 # Download and install MongoDB binaries directly for better architecture compatibility
 RUN ARCH=$(dpkg --print-architecture) \
     && echo "Building for architecture: $ARCH" \
@@ -47,10 +43,10 @@ RUN ARCH=$(dpkg --print-architecture) \
 
 # Copy backend
 WORKDIR /app
-COPY --from=backend /app ./
+COPY --from=toshi /app/toshi-moto/dist/apps/api/ ./
 
 # Copy frontend build
-COPY --from=frontend /app/build /var/www/html/
+COPY --from=toshi /app/toshi-moto/apps/web-ui/dist /var/www/html/
 
 # Copy configs
 COPY nginx.conf /etc/nginx/nginx.conf
