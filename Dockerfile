@@ -4,11 +4,26 @@ WORKDIR /app
 
 RUN npm install -g pnpm
 
-COPY toshi-moto ./toshi-moto
-RUN npm run toshi:install
+COPY toshi-moto .
+ENV CI=true
+RUN pnpm install --frozen-lockfile
+
+# backend env
+RUN echo "MONGODB_URI=mongodb://127.0.0.1:27017/toshi-moto" >> apps/api/.env
+
+# frontend env
+
+RUN echo "VITE_API_URL=/api" >> apps/api/.env
+RUN echo "VITE_BITCOIN_NODE_URL=/mempool" >> apps/web-ui/.env
+RUN echo "VITE_REST_TIME_BETWEEN_REQUESTS=0" >> apps/web-ui/.env
+RUN echo "VITE_MAX_CONCURRENT_REQUESTS=8" >> apps/web-ui/.env
+RUN echo "VITE_BITCOIN_NETWORK=mainnet" >> apps/web-ui/.env
+RUN echo "VITE_TOSHI_MOTO_XPUB=xpub6CmZrGaPxYM979hPaAGffsELpVQZbCBZ2GQU8YpJcu1BceeHWNeDqpgnyzganZDau4tC87jJTL97X4DUG1cQLsRrogKqB2z6vqv7bH85Lub" >> apps/web-ui/.env
+
+
 # frontend is toshi-moto/apps/web-ui
-RUN npm run toshi:build-ui
-RUN npm run toshi:build-api
+RUN npx nx run web-ui:build-umbrel
+RUN npx nx run api:build
 
 
 # Final image - use Ubuntu with direct MongoDB binary download
@@ -43,10 +58,10 @@ RUN ARCH=$(dpkg --print-architecture) \
 
 # Copy backend
 WORKDIR /app
-COPY --from=toshi /app/toshi-moto/dist/apps/api/ ./
+COPY --from=toshi /app/dist/apps/api/ ./
 
 # Copy frontend build
-COPY --from=toshi /app/toshi-moto/apps/web-ui/dist /var/www/html/
+COPY --from=toshi /app/apps/web-ui/dist /var/www/html/
 
 # Copy configs
 COPY nginx.conf /etc/nginx/nginx.conf
