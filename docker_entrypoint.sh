@@ -74,7 +74,7 @@ echo "nginx started with PID: $NGINX_PID"
 
 # Start Node.js server
 echo "Starting Node.js server on port 3001..."
-cd /app && node server.js &
+cd /app && node main.js &
 NODE_PID=$!
 echo "Node.js server started with PID: $NODE_PID"
 
