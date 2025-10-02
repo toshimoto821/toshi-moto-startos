@@ -8,12 +8,10 @@ COPY toshi-moto .
 ENV CI=true
 RUN pnpm install --frozen-lockfile
 
-# backend env
-RUN echo "MONGODB_URI=mongodb://127.0.0.1:27017/toshi-moto" >> apps/api/.env
 
 # frontend env
 
-RUN echo "VITE_API_URL=/api" >> apps/api/.env
+RUN echo "VITE_API_URL=/" >> apps/web-ui/.env
 RUN echo "VITE_BITCOIN_NODE_URL=/mempool" >> apps/web-ui/.env
 RUN echo "VITE_REST_TIME_BETWEEN_REQUESTS=0" >> apps/web-ui/.env
 RUN echo "VITE_MAX_CONCURRENT_REQUESTS=8" >> apps/web-ui/.env
@@ -62,6 +60,7 @@ RUN ARCH=$(dpkg --print-architecture) \
 # Copy backend
 WORKDIR /app
 COPY --from=toshi /app/dist/apps/api/ ./
+COPY --from=toshi /app/node_modules ./node_modules
 
 # Copy frontend build
 COPY --from=toshi /app/apps/web-ui/dist /var/www/html/
@@ -77,6 +76,7 @@ RUN useradd -r -M -d /data -s /bin/false mongodb \
     && mkdir -p /data/db \
     && chown -R mongodb:mongodb /data
 
-EXPOSE 80 3001
+EXPOSE 80 3000
+ENV MONGODB_URI=mongodb://127.0.0.1:27017/toshi-moto
 
 ENTRYPOINT ["/usr/local/bin/docker_entrypoint.sh"]

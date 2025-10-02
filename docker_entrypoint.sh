@@ -73,13 +73,14 @@ NGINX_PID=$!
 echo "nginx started with PID: $NGINX_PID"
 
 # Start Node.js server
-echo "Starting Node.js server on port 3001..."
+echo "Starting Node.js server on port 3000..."
 cd /app && node main.js &
 NODE_PID=$!
 echo "Node.js server started with PID: $NODE_PID"
 
 echo "Hello World service is running!"
-echo "Frontend available on port 80, API on port 3001"
+echo "Frontend available on port 80, API on port 3000"
+
 
 # Keep script running and monitor processes
 while true; do
