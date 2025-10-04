@@ -11,7 +11,12 @@ export const main = sdk.setupMain(async ({ effects, started }) => {
   const backendSub = await sdk.SubContainer.of(
     effects,
     { imageId: 'toshi-moto' },
-    null,
+    sdk.Mounts.of().mountVolume({
+      volumeId: 'main',
+      subpath: null,
+      mountpoint: '/data',
+      readonly: false,
+    }),
     'backend'
   )
 

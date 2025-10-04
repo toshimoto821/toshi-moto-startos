@@ -65,9 +65,6 @@ COPY --from=toshi /app/apps/web-ui/dist /var/www/html/
 
 # Copy configs
 COPY nginx.conf /etc/nginx/nginx.conf
-COPY docker_entrypoint.sh /usr/local/bin/
-COPY check-web.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/docker_entrypoint.sh /usr/local/bin/check-web.sh
 
 # Create MongoDB user and data directory
 RUN useradd -r -M -d /data -s /bin/false mongodb \
@@ -77,4 +74,5 @@ RUN useradd -r -M -d /data -s /bin/false mongodb \
 EXPOSE 80 3000
 ENV MONGODB_URI=mongodb://127.0.0.1:27017/toshi-moto
 
-ENTRYPOINT ["/usr/local/bin/docker_entrypoint.sh"]
+# No longer need the entrypoint script since StartOS handles process management
+# ENTRYPOINT ["/usr/local/bin/docker_entrypoint.sh"]
