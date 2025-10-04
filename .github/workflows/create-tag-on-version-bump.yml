@@ -1,0 +1,80 @@
+name: Create Tag on Version Bump
+
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - main
+
+jobs:
+  create-tag:
+    # Only run if PR was merged (not just closed)
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check PR title for version bump
+        id: check_title
+        run: |
+          PR_TITLE="${{ github.event.pull_request.title }}"
+          echo "PR Title: $PR_TITLE"
+
+          # Check if title matches pattern "version bump <version>" or "Version Bump <version>"
+          if [[ "$PR_TITLE" =~ ^[Vv]ersion [Bb]ump[[:space:]]+(.+)$ ]]; then
+            VERSION="${BASH_REMATCH[1]}"
+            echo "Found version bump: $VERSION"
+            echo "create_tag=true" >> $GITHUB_OUTPUT
+            echo "version=$VERSION" >> $GITHUB_OUTPUT
+          else
+            echo "PR title does not match version bump pattern"
+            echo "create_tag=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Checkout repository
+        if: steps.check_title.outputs.create_tag == 'true'
+        uses: actions/checkout@v4
+        with:
+          # Fetch full history for tagging
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create and push tag
+        if: steps.check_title.outputs.create_tag == 'true'
+        run: |
+          VERSION="${{ steps.check_title.outputs.version }}"
+
+          # Ensure we're on the main branch and up to date
+          git checkout main
+          git pull origin main
+
+          # Check if tag already exists
+          if git tag -l | grep -q "^${VERSION}$"; then
+            echo "Tag $VERSION already exists, skipping creation"
+            exit 0
+          fi
+
+          # Create the tag
+          git tag -a "$VERSION" -m "Release version $VERSION"
+
+          # Push the tag
+          git push origin "$VERSION"
+
+          echo "Successfully created and pushed tag: $VERSION"
+
+      - name: Create GitHub Release
+        if: steps.check_title.outputs.create_tag == 'true'
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.check_title.outputs.version }}
+          release_name: Release ${{ steps.check_title.outputs.version }}
+          body: |
+            Release ${{ steps.check_title.outputs.version }}
+
+            This release was created automatically from PR: ${{ github.event.pull_request.title }}
+
+            **Changes:**
+            ${{ github.event.pull_request.body }}
+          draft: false
+          prerelease: false
