@@ -20,7 +20,7 @@ jobs:
           echo "PR Title: $PR_TITLE"
 
           # Check if title matches pattern "version bump <version>" or "Version Bump <version>"
-          if [[ "$PR_TITLE" =~ ^[Vv]ersion [Bb]ump[[:space:]]+(.+)$ ]]; then
+          if [[ "$PR_TITLE" =~ ^[Vv]ersion\ [Bb]ump\ +(.+)$ ]]; then
             VERSION="${BASH_REMATCH[1]}"
             echo "Found version bump: $VERSION"
             echo "create_tag=true" >> $GITHUB_OUTPUT
