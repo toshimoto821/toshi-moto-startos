@@ -2,11 +2,11 @@ name: Bump Web Image Version
 
 on:
   workflow_dispatch:
-  inputs:
-    version:
-      description: 'Version to bump'
-      required: true
-      default: '1.0.0'
+    inputs:
+      version:
+        description: 'Version to bump'
+        required: true
+        default: '1.0.0'
 
 jobs:
   bump-web-image:
