@@ -1,5 +1,5 @@
 import { setupManifest } from '@start9labs/start-sdk'
-import { SDKImageInputSpec } from '@start9labs/start-sdk/base/lib/types/ManifestTypes'
+import type { SDKImageInputSpec } from '@start9labs/start-sdk/base/lib/types/ManifestTypes'
 
 const BUILD = process.env.BUILD || ''
 
@@ -7,22 +7,30 @@ const architectures =
   BUILD === 'x86_64' || BUILD === 'aarch64' ? [BUILD] : ['x86_64', 'aarch64']
 
 export const manifest = setupManifest({
-  id: 'hello-world-fullstack',
-  title: 'Hello World Full Stack',
+  id: 'toshi-moto-startos',
+  title: 'Toshi Moto',
   license: 'MIT',
-  wrapperRepo: 'https://github.com/Start9Labs/hello-world-fullstack',
-  upstreamRepo: 'https://github.com/Start9Labs/hello-world-fullstack',
-  supportSite: 'https://github.com/Start9Labs/hello-world-fullstack/issues',
-  marketingSite: 'https://github.com/Start9Labs/hello-world-fullstack',
-  donationUrl: 'https://github.com/Start9Labs/hello-world-fullstack',
-  docsUrl: 'https://github.com/Start9Labs/hello-world-fullstack#readme',
+  wrapperRepo: 'https://github.com/toshimoto821/toshi-moto-startos',
+  upstreamRepo: 'https://github.com/toshimoto821/toshi-moto',
+  supportSite: 'https://toshimoto.app',
+  marketingSite: 'https://toshimoto.app',
+  donationUrl: 'https://toshimoto.app',
+  docsUrl: 'https://toshimoto.app',
   description: {
-    short: 'A full-stack hello world application with React, Node.js, and MongoDB',
-    long: 'This is a demonstration application showing how to package a full-stack web application for StartOS. It includes a React frontend, Node.js backend API, and MongoDB database all running in a single container. Perfect for learning how to create complex Start9 services.',
+    short:
+      'Toshi Moto is a watch-only Bitcoin wallet designed for secure portfolio monitoring and transaction tracking.',
+    long: `Toshi Moto is a watch only Bitcoin wallet aggregator.
+    Key Features:
+    - Import your extended public key (Xpub) to monitor multiple Bitcoin addresses simultaneously
+    - Real-time balance aggregation across all your wallets and addresses
+    - Comprehensive transaction history and monitoring capabilities
+    - Privacy-focused: All data remains local to your browser - no sensitive information is transmitted to servers
+    - Read-only security: Cannot spend or sign transactions, ensuring your funds remain safe
+    Perfect for Bitcoin enthusiasts who want to monitor their holdings securely without compromising privacy or security.`,
   },
   volumes: ['main'],
   images: {
-    main: {
+    'toshi-moto': {
       source: {
         dockerBuild: {},
       },
@@ -40,5 +48,16 @@ export const manifest = setupManifest({
     start: null,
     stop: null,
   },
-  dependencies: {},
+  dependencies: {
+    bitcoind: {
+      description: 'Used to query the Bitcoin blockchain',
+      optional: false,
+      s9pk: 'https://github.com/Start9Labs/bitcoind-startos/releases/download/v29.1.0.2-beta.0/bitcoind.s9pk',
+    },
+    mempool: {
+      description: 'Used for API calls to query the Bitcoin blockchain',
+      optional: false,
+      s9pk: 'https://github.com/Start9Labs/mempool-startos/releases/download/v3.2.1.2/mempool.s9pk',
+    },
+  },
 })

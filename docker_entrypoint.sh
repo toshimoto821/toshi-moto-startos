@@ -2,7 +2,7 @@
 
 set -e
 
-echo "Starting Hello World service..."
+echo "Starting Toshi Moto service..."
 
 # Function to handle shutdown gracefully
 cleanup() {
@@ -40,31 +40,19 @@ echo "MongoDB started with PID: $MONGOD_PID"
 
 # Wait for MongoDB to be ready
 echo "Waiting for MongoDB to be ready..."
-for i in {1..30}; do
+for i in {1..60}; do
     if echo 'db.runCommand("ping")' | mongo --quiet localhost:27017/test >/dev/null 2>&1; then
         echo "MongoDB is ready!"
         break
     fi
-    if [ $i -eq 30 ]; then
-        echo "MongoDB failed to start within 30 seconds"
+    if [ $i -eq 60 ]; then
+        echo "MongoDB failed to start within 60 seconds"
         exit 1
     fi
-    echo "Waiting for MongoDB... ($i/30)"
+    echo "Waiting for MongoDB... ($i/60)"
     sleep 1
 done
 
-# Initialize MongoDB with sample data
-echo "Initializing database..."
-mongo helloworld --eval "
-if (db.users.countDocuments({}) === 0) {
-    print('Adding sample data...');
-    db.users.insertMany([
-        {name: 'Alice', email: 'alice@example.com', createdAt: new Date()},
-        {name: 'Bob', email: 'bob@example.com', createdAt: new Date()}
-    ]);
-    print('Sample data added');
-}
-" || echo "Database initialization completed"
 
 # Start nginx
 echo "Starting nginx..."
