@@ -1,17 +1,28 @@
-# Build frontend
-FROM node:18-alpine AS frontend
+# Build toshi
+FROM node:20-alpine AS toshi
 WORKDIR /app
-COPY frontend/package*.json ./
-RUN npm install
-COPY frontend/ ./
-RUN npm run build
 
-# Build backend
-FROM node:18-alpine AS backend
-WORKDIR /app
-COPY backend/package*.json ./
-RUN npm install --omit=dev
-COPY backend/ ./
+RUN npm install -g pnpm
+
+COPY toshi-moto .
+ENV CI=true
+RUN pnpm install --frozen-lockfile
+
+
+# frontend env
+
+RUN echo "VITE_API_URL=/" >> apps/web-ui/.env
+RUN echo "VITE_BITCOIN_NODE_URL=/mempool" >> apps/web-ui/.env
+RUN echo "VITE_REST_TIME_BETWEEN_REQUESTS=0" >> apps/web-ui/.env
+RUN echo "VITE_MAX_CONCURRENT_REQUESTS=8" >> apps/web-ui/.env
+RUN echo "VITE_BITCOIN_NETWORK=mainnet" >> apps/web-ui/.env
+RUN echo "VITE_TOSHI_MOTO_XPUB=xpub6CmZrGaPxYM979hPaAGffsELpVQZbCBZ2GQU8YpJcu1BceeHWNeDqpgnyzganZDau4tC87jJTL97X4DUG1cQLsRrogKqB2z6vqv7bH85Lub" >> apps/web-ui/.env
+
+
+# frontend is toshi-moto/apps/web-ui
+RUN npx nx run web-ui:build-umbrel
+RUN npx nx run api:build
+
 
 # Final image - use Ubuntu with direct MongoDB binary download
 FROM ubuntu:20.04
@@ -45,12 +56,14 @@ RUN ARCH=$(dpkg --print-architecture) \
     && rm -rf mongodb* \
     && mkdir -p /data/db
 
+
 # Copy backend
 WORKDIR /app
-COPY --from=backend /app ./
+COPY --from=toshi /app/dist/apps/api/ ./
+COPY --from=toshi /app/node_modules ./node_modules
 
 # Copy frontend build
-COPY --from=frontend /app/build /var/www/html/
+COPY --from=toshi /app/apps/web-ui/dist /var/www/html/
 
 # Copy configs
 COPY nginx.conf /etc/nginx/nginx.conf
@@ -63,6 +76,7 @@ RUN useradd -r -M -d /data -s /bin/false mongodb \
     && mkdir -p /data/db \
     && chown -R mongodb:mongodb /data
 
-EXPOSE 80 3001
+EXPOSE 80 3000
+ENV MONGODB_URI=mongodb://127.0.0.1:27017/toshi-moto
 
 ENTRYPOINT ["/usr/local/bin/docker_entrypoint.sh"]

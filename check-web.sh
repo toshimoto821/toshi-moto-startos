@@ -13,14 +13,14 @@ if ! curl -f -s http://localhost:80/nginx-health > /dev/null 2>&1; then
 fi
 
 # Check if the backend API is responding
-if ! curl -f -s http://localhost:3001/api/health > /dev/null 2>&1; then
+if ! curl -f -s http://localhost:3000/api/healthcheck > /dev/null 2>&1; then
     echo '{"status": "error", "message": "Backend API server is not responding"}'
     exit 1
 fi
 
 # Check if MongoDB is accessible via the API (through nginx proxy)
-if ! curl -f -s http://localhost:80/api/users > /dev/null 2>&1; then
-    echo '{"status": "error", "message": "Database connection failed or API proxy not working"}'
+if ! curl -f -s http://localhost:80/api/healthcheck > /dev/null 2>&1; then
+    echo '{"status": "error", "message": "API proxy not working or backend not responding"}'
     exit 1
 fi
 

@@ -1,0 +1,51 @@
+name: Bump Web Image Version
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to bump'
+        required: true
+        default: '1.0.0'
+
+jobs:
+  bump-web-image:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Extract version number
+        id: extract_version
+        run: |
+          # Extract version number from input (e.g., web-ui-1.32.6 -> 1.32.6)
+          VERSION_NUMBER=$(echo "${{ github.event.inputs.version }}" | sed 's/.*-\([0-9]\+\.[0-9]\+\.[0-9]\+\)/\1/')
+          echo "version_number=$VERSION_NUMBER" >> $GITHUB_OUTPUT
+          echo "Extracted version: $VERSION_NUMBER"
+
+      - name: update toshi-moto submodule
+        run: |
+          git submodule update --init --recursive
+          cd toshi-moto
+          git fetch --tags
+          git checkout ${{ github.event.inputs.version }}
+
+      - name: bump version
+        run: |
+          sed -i "s/^version: .*/version: ${{ steps.extract_version.outputs.version_number }}/" manifest.yaml
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          base: main
+          branch: bump-toshi-moto-version
+          title: 'Version Bump ${{ steps.extract_version.outputs.version_number }}'
+          body: 'This PR was created automatically by GitHub Actions.'
+          draft: false
+          branch-suffix: '' # Ensure no suffix is added to the branch name
+          commit-message: 'Bump web image version to ${{ steps.extract_version.outputs.version_number }}'
+          committer: 'github-actions[bot] <github-actions[bot]@users.noreply.github.com>'
+          author: 'github-actions[bot] <github-actions[bot]@users.noreply.github.com>'
+          signoff: false
