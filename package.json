@@ -1,7 +1,7 @@
 {
-  "name": "hello-world-fullstack-startos",
+  "name": "toshi-moto-startos",
   "version": "0.1.0",
-  "description": "Hello World Full Stack service for StartOS",
+  "description": "Toshi Moto is a watch-only Bitcoin wallet designed for secure portfolio monitoring and transaction tracking.",
   "scripts": {
     "build": "rm -rf ./javascript && ncc build startos/index.ts -o ./javascript",
     "prettier": "prettier --write .",
@@ -16,7 +16,6 @@
     "prettier": "^3.6.2",
     "typescript": "^5.9.2"
   },
-  
   "prettier": {
     "trailingComma": "es5",
     "tabWidth": 2,
