@@ -1,6 +1,6 @@
 id: toshi-moto-startos
 title: 'Toshi Moto'
-version: 0.1.0
+version: 1.33.0
 release-notes: |
   * Initial release for StartOS
   * React frontend
