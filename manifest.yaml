@@ -1,23 +1,28 @@
-id: hello-world-fullstack
-title: 'Hello World Full Stack'
+id: toshi-moto-startos
+title: 'Toshi Moto'
 version: 0.1.0
 release-notes: |
-  * Initial release
+  * Initial release for StartOS
   * React frontend
   * Node.js backend with API
   * MongoDB database
-license: mit
-wrapper-repo: 'https://github.com/Start9Labs/hello-world-fullstack'
-upstream-repo: 'https://github.com/Start9Labs/hello-world-fullstack'
-support-site: 'https://github.com/Start9Labs/hello-world-fullstack/issues'
+license: Apache-2.0
+wrapper-repo: 'https://github.com/toshimoto821/toshi-moto-startos'
+upstream-repo: 'https://github.com/toshimoto821/toshi-moto-startos'
+support-site: 'https://github.com/toshimoto821/toshi-moto-startos/issues'
 build: ['make']
 description:
-  short: A full-stack hello world application with React, Node.js, and MongoDB
+  short: Toshi Moto is a watch-only Bitcoin wallet designed for secure portfolio monitoring and transaction tracking.
   long: |
-    This is a demonstration application showing how to package a full-stack web application for StartOS.
-    It includes a React frontend, Node.js backend API, and MongoDB database all running in a single container.
-    Perfect for learning how to create complex Start9 services.
-
+    Toshi Moto is a watch-only Bitcoin wallet designed for secure portfolio monitoring and transaction tracking.
+    Key Features:
+      - Import your extended public key (Xpub) to monitor multiple Bitcoin addresses simultaneously
+      - Real-time balance aggregation across all your wallets and addresses
+      - Comprehensive transaction history and monitoring capabilities
+      - Privacy-focused: All data remains local to your browser - no sensitive information is transmitted to servers
+      - Read-only security: Cannot spend or sign transactions, ensuring your funds remain safe
+      
+      Perfect for Bitcoin enthusiasts who want to monitor their holdings securely without compromising privacy or security.
 assets:
   license: LICENSE
   icon: icon.png
@@ -36,7 +41,7 @@ main:
 health-checks:
   main:
     name: 'Web Interface'
-    success-message: 'Hello World is ready to use'
+    success-message: 'Toshi Moto is ready to use'
     type: docker
     image: main
     entrypoint: 'check-web.sh'
@@ -55,7 +60,7 @@ volumes:
 interfaces:
   main:
     name: 'Web Interface'
-    description: 'Main web interface for Hello World Full Stack (served by nginx)'
+    description: 'Main web interface for Toshi Moto (served by nginx)'
     tor-config:
       port-mapping:
         80: '80'

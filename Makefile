@@ -7,29 +7,29 @@ TS_FILES := $(shell find scripts -name \*.ts 2>/dev/null || echo "")
 
 all: verify
 
-verify: hello-world-fullstack.s9pk
+verify: toshi-moto-startos.s9pk
 	@echo "Verifying package..."
-	@start-sdk verify s9pk hello-world-fullstack.s9pk
+	@start-sdk verify s9pk toshi-moto-startos.s9pk
 	@echo "Package verification complete!"
 
 install: hello-world-fullstack.s9pk
 	@echo "Installing package..."
-	@start-cli package install hello-world-fullstack.s9pk
+	@start-cli package install toshi-moto-startos.s9pk
 
 clean:
 	rm -rf docker-images
-	rm -f hello-world-fullstack.s9pk
+	rm -f toshi-moto-startos.s9pk
 	rm -f scripts/*.js
 
-hello-world-fullstack.s9pk: manifest.yaml instructions.md LICENSE icon.png docker-images/aarch64.tar docker-images/x86_64.tar
+toshi-moto-startos.s9pk: manifest.yaml instructions.md LICENSE icon.png docker-images/aarch64.tar docker-images/x86_64.tar
 	@echo "Packing service..."
 	@start-sdk pack
 
-docker-images/aarch64.tar: Dockerfile docker_entrypoint.sh check-web.sh nginx.conf frontend backend $(TS_FILES)
+docker-images/aarch64.tar: Dockerfile docker_entrypoint.sh check-web.sh nginx.conf $(TS_FILES)
 	mkdir -p docker-images
 	docker buildx build --tag start9/$(PKG_ID)/main:$(PKG_VERSION) --platform=linux/arm64 -o type=docker,dest=docker-images/aarch64.tar .
 
-docker-images/x86_64.tar: Dockerfile docker_entrypoint.sh check-web.sh nginx.conf frontend backend $(TS_FILES)
+docker-images/x86_64.tar: Dockerfile docker_entrypoint.sh check-web.sh nginx.conf $(TS_FILES)
 	mkdir -p docker-images
 	docker buildx build --tag start9/$(PKG_ID)/main:$(PKG_VERSION) --platform=linux/amd64 -o type=docker,dest=docker-images/x86_64.tar .
 
