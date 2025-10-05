@@ -28,11 +28,23 @@ export const manifest = setupManifest({
     - Read-only security: Cannot spend or sign transactions, ensuring your funds remain safe
     Perfect for Bitcoin enthusiasts who want to monitor their holdings securely without compromising privacy or security.`,
   },
-  volumes: ['main'],
+  volumes: ['frontend', 'backend', 'mongodb'],
   images: {
-    'toshi-moto': {
+    frontend: {
       source: {
-        dockerBuild: {},
+        dockerTag: 'toshimoto821/toshi-moto:1.33.1',
+      },
+      arch: architectures,
+    } as SDKImageInputSpec,
+    backend: {
+      source: {
+        dockerTag: 'toshimoto821/toshi-moto-api:1.8.4',
+      },
+      arch: architectures,
+    } as SDKImageInputSpec,
+    mongodb: {
+      source: {
+        dockerTag: 'mongo:8.0.10',
       },
       arch: architectures,
     } as SDKImageInputSpec,

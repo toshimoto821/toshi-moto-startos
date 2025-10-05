@@ -1,35 +1,89 @@
 import { sdk } from './sdk'
 
 export const main = sdk.setupMain(async ({ effects, started }) => {
-  const uiSub = await sdk.SubContainer.of(
+  // ========================
+  // Set containers with proper mounts
+  // ========================
+
+  const mongoContainer = await sdk.SubContainer.of(
     effects,
-    { imageId: 'toshi-moto' },
-    null,
-    'ui'
+    { imageId: 'mongodb' },
+    sdk.Mounts.of().mountVolume({
+      volumeId: 'mongodb',
+      subpath: null,
+      mountpoint: '/data/db',
+      readonly: false,
+    }),
+    'database'
   )
 
-  const backendSub = await sdk.SubContainer.of(
+  const backendContainer = await sdk.SubContainer.of(
     effects,
-    { imageId: 'toshi-moto' },
+    { imageId: 'backend' },
     sdk.Mounts.of().mountVolume({
-      volumeId: 'main',
+      volumeId: 'backend',
       subpath: null,
       mountpoint: '/data',
       readonly: false,
     }),
-    'backend'
+    'backend-api'
   )
+
+  const frontendContainer = await sdk.SubContainer.of(
+    effects,
+    { imageId: 'frontend' },
+    sdk.Mounts.of().mountVolume({
+      volumeId: 'frontend',
+      subpath: null,
+      mountpoint: '/data',
+      readonly: false,
+    }),
+    'user-interface'
+  )
+
+  // ========================
+  // Custom health checks
+  // ========================
+
+  const apiDataReadyCheck = {
+    display: 'API Data Import',
+    fn: async () => {
+      try {
+        const response = await fetch(
+          'http://toshi-moto.startos:3000/api/prices/data-imported'
+        )
+        const data = await response.json()
+
+        if (data.status === true) {
+          return {
+            result: 'success' as const,
+            message: 'API data has been imported and is ready',
+          }
+        } else {
+          return {
+            result: 'failure' as const,
+            message: 'API data is still being imported',
+          }
+        }
+      } catch (error) {
+        return {
+          result: 'failure' as const,
+          message: `API data import check failed: ${(error as Error).message}`,
+        }
+      }
+    },
+  }
 
   return sdk.Daemons.of(effects, started)
     .addDaemon('mongodb', {
-      subcontainer: backendSub,
+      subcontainer: mongoContainer,
       exec: {
         command: [
           'mongod',
           '--dbpath',
           '/data/db',
           '--bind_ip',
-          '127.0.0.1',
+          '0.0.0.0',
           '--port',
           '27017',
           '--quiet',
@@ -46,12 +100,12 @@ export const main = sdk.setupMain(async ({ effects, started }) => {
       requires: [],
     })
     .addDaemon('backend', {
-      subcontainer: backendSub,
+      subcontainer: backendContainer,
       exec: {
         command: [
           'sh',
           '-c',
-          'cd /app && MONGODB_URI=mongodb://127.0.0.1:27017/toshi-moto node main.js',
+          'cd /app && MONGODB_URI=mongodb://mongodb:27017/toshi-moto node main.js',
         ],
       },
       ready: {
@@ -64,8 +118,12 @@ export const main = sdk.setupMain(async ({ effects, started }) => {
       },
       requires: ['mongodb'],
     })
-    .addDaemon('ui', {
-      subcontainer: uiSub,
+    .addHealthCheck('api-data', {
+      ready: apiDataReadyCheck,
+      requires: ['backend'],
+    })
+    .addDaemon('frontend', {
+      subcontainer: frontendContainer,
       exec: {
         command: ['nginx', '-g', 'daemon off;'],
       },
@@ -77,6 +135,6 @@ export const main = sdk.setupMain(async ({ effects, started }) => {
             errorMessage: 'The web interface is not ready',
           }),
       },
-      requires: ['backend'],
+      requires: ['api-data'],
     })
 })
