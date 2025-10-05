@@ -48,7 +48,7 @@ arm: aarch64
 $(S9PK): $(INGREDIENTS) .git/HEAD .git/index
 	@$(MAKE) --no-print-directory ingredients
 	@echo "   Packing '$(S9PK)'..."
-	BUILD=$(BUILD) start-cli s9pk pack -o $(S9PK) --icon ./icon.png --no-assets
+	BUILD=$(BUILD) start-cli s9pk pack -o $(S9PK) --icon ./icon.png
 
 ingredients: $(INGREDIENTS)
 	@echo "   Re-evaluating ingredients..."
