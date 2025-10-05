@@ -3,7 +3,7 @@ import type { SDKImageInputSpec } from "@start9labs/start-sdk/base/lib/types/Man
 
 const BUILD = process.env.BUILD || "";
 
-const architectures =
+const arch =
 	BUILD === "x86_64" || BUILD === "aarch64" ? [BUILD] : ["x86_64", "aarch64"];
 
 export const manifest = setupManifest({
@@ -28,31 +28,31 @@ export const manifest = setupManifest({
     - Read-only security: Cannot spend or sign transactions, ensuring your funds remain safe
     Perfect for Bitcoin enthusiasts who want to monitor their holdings securely without compromising privacy or security.`,
 	},
-	volumes: ['frontend', 'mongodb'],
+	volumes: ["frontend", "mongodb"],
 
 	images: {
 		frontend: {
 			source: {
 				dockerTag: "toshimoto821/toshi-moto:1.33.1",
 			},
-			arch: architectures,
+			arch: arch,
 		} as SDKImageInputSpec,
-		  backend: {
-		    source: {
-		      dockerTag: 'toshimoto821/toshi-moto-api:1.8.4',
-		    },
-		    arch: architectures,
-		  } as SDKImageInputSpec,
-		  mongodb: {
-		    source: {
-		      dockerTag:
-		        'mongo:4.4.6-bionic@sha256:3d0e6df9fd5bc42cbf8ef8bc9e6c4e78f6f26c7157dbd7bdec72d202ab8ebe3a',
-		    },
-		    arch: architectures,
-		  } as SDKImageInputSpec,
+		backend: {
+			source: {
+				dockerTag: "toshimoto821/toshi-moto-api:1.8.4",
+			},
+			arch: arch,
+		} as SDKImageInputSpec,
+		mongodb: {
+			source: {
+				dockerTag:
+					"mongo:4.4.6-bionic@sha256:3d0e6df9fd5bc42cbf8ef8bc9e6c4e78f6f26c7157dbd7bdec72d202ab8ebe3a",
+			},
+			arch: arch,
+		} as SDKImageInputSpec,
 	},
 	hardwareRequirements: {
-		arch: architectures,
+		arch: arch,
 	},
 	alerts: {
 		install: null,
@@ -63,15 +63,15 @@ export const manifest = setupManifest({
 		stop: null,
 	},
 	dependencies: {
-		bitcoind: {
-			description: "Used to query the Bitcoin blockchain",
-			optional: false,
-			s9pk: "https://github.com/Start9Labs/bitcoind-startos/releases/download/v29.1.0.2-beta.0/bitcoind.s9pk",
-		},
-		mempool: {
-			description: "Used for API calls to query the Bitcoin blockchain",
-			optional: false,
-			s9pk: "https://github.com/Start9Labs/mempool-startos/releases/download/v3.2.1.2/mempool.s9pk",
-		},
+		// bitcoind: {
+		// 	description: "Used to query the Bitcoin blockchain",
+		// 	optional: false,
+		// 	s9pk: "https://github.com/Start9Labs/bitcoind-startos/releases/download/v29.1.0.2-beta.0/bitcoind.s9pk",
+		// },
+		// mempool: {
+		// 	description: "Used for API calls to query the Bitcoin blockchain",
+		// 	optional: false,
+		// 	s9pk: "https://github.com/Start9Labs/mempool-startos/releases/download/v3.2.1.2/mempool.s9pk",
+		// },
 	},
 });
