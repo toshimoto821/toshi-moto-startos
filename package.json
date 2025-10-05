@@ -1,6 +1,5 @@
 {
   "name": "toshi-moto-startos",
-  "version": "0.1.0",
   "description": "Toshi Moto is a watch-only Bitcoin wallet designed for secure portfolio monitoring and transaction tracking.",
   "scripts": {
     "build": "rm -rf ./javascript && ncc build startos/index.ts -o ./javascript",

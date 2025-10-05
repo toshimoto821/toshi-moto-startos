@@ -20,24 +20,25 @@ export const main = sdk.setupMain(async ({ effects, started }) => {
   const backendContainer = await sdk.SubContainer.of(
     effects,
     { imageId: 'backend' },
-    sdk.Mounts.of().mountVolume({
-      volumeId: 'backend',
-      subpath: null,
-      mountpoint: '/data',
-      readonly: false,
-    }),
+    null,
     'backend-api'
   )
 
   const frontendContainer = await sdk.SubContainer.of(
     effects,
     { imageId: 'frontend' },
-    sdk.Mounts.of().mountVolume({
-      volumeId: 'frontend',
-      subpath: null,
-      mountpoint: '/data',
-      readonly: false,
-    }),
+    sdk.Mounts.of()
+      .mountVolume({
+        volumeId: 'frontend',
+        subpath: null,
+        mountpoint: '/usr/share/nginx/html',
+        readonly: false,
+      })
+      .mountAssets({
+        subpath: 'default.conf',
+        mountpoint: '/etc/nginx/conf.d/default.conf',
+        type: 'file',
+      }),
     'user-interface'
   )
 
@@ -50,7 +51,7 @@ export const main = sdk.setupMain(async ({ effects, started }) => {
     fn: async () => {
       try {
         const response = await fetch(
-          'http://toshi-moto.startos:3000/api/prices/data-imported'
+          'http://toshi-moto.startos:8121/api/prices/data-imported'
         )
         const data = await response.json()
 
@@ -105,13 +106,13 @@ export const main = sdk.setupMain(async ({ effects, started }) => {
         command: [
           'sh',
           '-c',
-          'cd /app && MONGODB_URI=mongodb://mongodb:27017/toshi-moto node main.js',
+          'cd /app && PORT=8121 MONGODB_URI=mongodb://mongodb:27017/toshi-moto node main.js',
         ],
       },
       ready: {
         display: 'Backend API',
         fn: () =>
-          sdk.healthCheck.checkPortListening(effects, 3000, {
+          sdk.healthCheck.checkPortListening(effects, 8121, {
             successMessage: 'The backend API is ready',
             errorMessage: 'The backend API is not ready',
           }),
@@ -125,12 +126,12 @@ export const main = sdk.setupMain(async ({ effects, started }) => {
     .addDaemon('frontend', {
       subcontainer: frontendContainer,
       exec: {
-        command: ['nginx', '-g', 'daemon off;'],
+        command: sdk.useEntrypoint(),
       },
       ready: {
         display: 'Web Interface',
         fn: () =>
-          sdk.healthCheck.checkPortListening(effects, 80, {
+          sdk.healthCheck.checkPortListening(effects, 8021, {
             successMessage: 'The web interface is ready',
             errorMessage: 'The web interface is not ready',
           }),
